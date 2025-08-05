@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoFenomenaMAN</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f8ff;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background: linear-gradient(135deg, #1a73e8, #34a853);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+        }
+        .input-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0d62c9;
+        }
+        .result-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>GeoFenomenaMAN</h1>
+            <p>Eksplorasi Fenomena Geografi dalam Kehidupan Sehari-hari</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="input-section">
+            <h2>Input Fenomena Geografi</h2>
+            <textarea id="phenomenonInput" placeholder="Deskripsikan fenomena yang kamu lihat (Contoh: Di daerah pegunungan dekat sekolahku, sering terjadi kabut tebal di pagi hari...)"></textarea>
+            <button onclick="getExplanation()">Analisis Fenomena</button>
+        </div>
+        
+        <div class="result-section">
+            <h2>Hasil Analisis</h2>
+            <div id="result">
+                <p>Silakan masukkan fenomena untuk melihat analisis...</p>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>GeoFenomenaMAN - Proyek Open Source untuk Pendidikan Geografi</p>
+        </div>
+    </footer>
+    
+    <script>
+        f<script>
+    async function getExplanation() {
+        const input = document.getElementById('phenomenonInput').value.trim();
+        const resultDiv = document.getElementById('result');
+        
+        if (!input) {
+            resultDiv.innerHTML = '<p style="color:red;">Silakan masukkan deskripsi fenomena terlebih dahulu!</p>';
+            return;
+        }
+        
+        // Tampilkan loading
+        resultDiv.innerHTML = `
+            <div style="text-align:center; padding:20px;">
+                <div style="font-size:24px; margin-bottom:10px;">⏳</div>
+                <p>Menganalisis fenomena geografi...</p>
+            </div>
+        `;
+        
+        try {
+            // Ganti YOUR_HF_TOKEN dengan token yang Anda dapatkan
+            const HF_TOKEN = "Yhf_SnfTIMWJGawcOdAZudDKVjtMsxwsOzIDsdEN";
+            const MODEL_NAME = "google/flan-t5-xxl";
+            
+            const response = await fetch(
+                `https://api-inference.huggingface.co/models/${MODEL_NAME}`,
+                {
+                    method: "POST",
+                    headers: { 
+                        "Authorization": `Bearer ${HF_TOKEN}`,
+                        "Content-Type": "application/json" 
+                    },
+                    body: JSON.stringify({
+                        inputs: `Jelaskan fenomena geografi berikut dalam bahasa Indonesia: "${input}". 
+                                 Identifikasi konsep geografi yang relevan (geomorfologi, klimatologi, hidrologi),
+                                 berikan penjelasan ilmiah singkat, dan contoh serupa di Indonesia.`
+                    })
+                }
+            );
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            const explanation = data[0]?.generated_text || "Tidak dapat menghasilkan penjelasan";
+            
+            // Tampilkan hasil
+            resultDiv.innerHTML = `
+                <div style="background-color:#e6f7ff; padding:15px; border-radius:5px;">
+                    <h3>Fenomena: ${input}</h3>
+                    <p><strong>Penjelasan Geografi:</strong></p>
+                    <p>${explanation}</p>
+                </div>
+            `;
+            
+        } catch (error) {
+            console.error(error);
+            resultDiv.innerHTML = `
+                <div style="background-color:#ffebee; padding:15px; border-radius:5px;">
+                    <h3>Terjadi Kesalahan</h3>
+                    <p>${error.message || "Gagal memproses permintaan. Silakan coba lagi."}</p>
+                    <p>Pastikan token Hugging Face Anda valid dan model siap digunakan.</p>
+                </div>
+            `;
+        }
+    }
+</script>
+</body>
+</html>
